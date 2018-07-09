@@ -18,13 +18,16 @@ class TorchSet(Dataset):
         self.lang.loadLang(lang_path)
         self.unitset.load(unitset_path)
         self.batch_size = batch_size
-        
+
+        self.testset = self.unitset[int(len(self.unitset)*0.9):]
+        self.unitset = self.unitset[0:int(len(self.unitset)*0.9)]
 
     def __getitem__(self, index):
         return self.tensorsFromSession(self.unitset[index].context)
 
     def __len__(self):
         return len(self.unitset)
+
 
     def indexesFromSentence(self, sentence):
         return [self.lang.word2index[word] for word in sentence.split(' ')]

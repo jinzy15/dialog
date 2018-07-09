@@ -150,7 +150,7 @@ class EDModels(torchsetModels):
 
     def evaluateRandomly(self,n):
         for i in range(n):
-            session = random.choice(self.dataset.unitset)
+            session = random.choice(self.dataset.testset)
             session = session.context
             print('>', session[0])
             print('=', session[-1])
