@@ -1,9 +1,7 @@
 # coding: utf-8
-
 from __future__ import unicode_literals, print_function, division
-from utils.Lang import Lang
 from Config import *
-from dataset.pairSet import pairSet
+from dataset.torchset import TorchSet
 import transformer.Modules as Modules
 from transformer.Models.EDModels import EDModels
 from torch.utils.data import DataLoader
@@ -20,12 +18,12 @@ import torch.nn.functional as F
 import os
 import numpy as np
 
-mylang = Lang('all',pair_file)
-pairs = mylang.prepareData(False)
-mydata = pairSet(pairs,mylang)
+mydata = TorchSet('data/last_set.set','data/last_set.lang')
+input_size = mydata.lang.n_words
+output_size = mydata.lang.n_words
 
-encoder1 = Modules.EncoderRNN(mylang.n_words, hidden_size).to(device)
-attn_decoder1 = Modules.AttnDecoderRNN(hidden_size, mylang.n_words, dropout_p=0.1).to(device)
+encoder1 = Modules.EncoderRNN(input_size, hidden_size).to(device)
+attn_decoder1 = Modules.AttnDecoderRNN(hidden_size, output_size, dropout_p=0.1).to(device)
 
 if (use_histmodel):
     encoder1.load_state_dict(torch.load(histmodel_path+'_encoder.pkl'))
@@ -37,11 +35,11 @@ testloader = DataLoader(mydata)
 mymodel = EDModels(mydata,trainloader,testloader,encoder1,attn_decoder1)
 
 if(is_train):
-    mymodel.trainEpoch(2,100)
-
+    mymodel.trainEpoch(5,100)
+    # mymodel.trainIters(100)
 if(is_evaluate):
     mymodel.evaluateRandomly(10)
-    output_words, attentions = mymodel.evaluate("你好")
+    output_words= mymodel.evaluate("你好")
     print(output_words)
 
 

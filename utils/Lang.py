@@ -1,7 +1,7 @@
 import utils.Normalizer as Norm
 import sys
 sys.path.append('../')
-from Config import *
+# from Config import *
 
 import numpy as np
 import pickle as pkl
