@@ -68,3 +68,19 @@ class pickLastProcessor(Processor):
     def processUnit(self,unit):
         unit.context = unit.context[-2:]
         return unit
+
+MAX_LENGTH = 30
+class divideProcessor(Processor):
+    def processUnit(self,unit):
+        print(unit.context)
+        new_context = []
+        for sentence in unit.context:
+            if(len(sentence.split(' '))>MAX_LENGTH):
+                # import ipdb;ipdb.set_trace()
+                n_times = len(sentence.split(' '))/MAX_LENGTH
+                for i in range(int(n_times)+1):
+                    new_context.append(' '.join(sentence.split(' ')[i*MAX_LENGTH:(i+1)*MAX_LENGTH]))
+            else:
+                new_context.append(sentence)
+        unit.context = new_context
+        return unit

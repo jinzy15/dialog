@@ -1,13 +1,18 @@
 from transformer.Models.Models import *
+from visdom import Visdom
+import numpy as np
 
 class HRED(torchsetModels):
-    def __init__(self, dataset,train_loader, test_loader, encoder,decoder,context):
+    def __init__(self, dataset,train_loader, test_loader, encoder,decoder,context,use_vis=False):
         self.train_loader = train_loader
         self.test_loader = test_loader
         self.encoder = encoder
         self.decoder = decoder
         self.dataset = dataset
         self.context = context
+        self.use_vis = use_vis
+        if(use_vis):
+            self.vis = Visdom(env='hred')
 
     def train(self,session,len_session,criterion,encoder_optimizer,context_optimizer,decoder_optimizer):
         if(len_session>1):
@@ -15,8 +20,6 @@ class HRED(torchsetModels):
             tar_session = session[1:]
             encoder_hidden = self.encoder.initHidden()
             context_hidden = self.context.initHidden()
-            # print (device)
-            # print (type(in_session),type(encoder_hidden))
             in_session,session_hidden = self.encoder(in_session,encoder_hidden)
 
             for idx,sentence in enumerate(torch.transpose(session_hidden,1,0)):
@@ -80,9 +83,10 @@ class HRED(torchsetModels):
             print('fuck')
             return 0
 
-    def trainEpoch(self,epoch_times = 1, print_every=10000, plot_every=100,save_every=100,learning_rate=0.0001):
+    def trainEpoch(self,epoch_times = 1, print_every=100, plot_every=30,save_every=100,learning_rate=0.0001):
         start = time.time()
         plot_losses = []
+        x_plot_losses = []
         print_loss_total = 0  # Reset every print_every
         plot_loss_total = 0  # Reset every plot_every
 
@@ -90,7 +94,12 @@ class HRED(torchsetModels):
         decoder_optimizer = optim.Adam(self.decoder.parameters(), lr=learning_rate)
         context_optimizer = optim.Adam(self.context.parameters(), lr=learning_rate)
 
-        criterion = nn.CrossEntropyLoss()
+        criterion = nn.NLLLoss()
+        plot_times = 0
+
+        if (use_vis):
+            win = self.vis.line(X=np.array([0]), Y=np.array([0]))
+
         for epoch in range(epoch_times):
             n_iters = len(self.dataset)
             for iter,session in enumerate(self.dataset):
@@ -98,6 +107,7 @@ class HRED(torchsetModels):
                 loss = self.train(session,len_session,criterion,encoder_optimizer,context_optimizer,decoder_optimizer)
                 print_loss_total += loss
                 plot_loss_total += loss
+
                 if (iter+epoch*n_iters)%print_every == 0:
                     print_loss_avg = print_loss_total / print_every
                     print_loss_total = 0
@@ -106,20 +116,27 @@ class HRED(torchsetModels):
 
                 if (iter+epoch*n_iters)% plot_every == 0:
                     plot_loss_avg = plot_loss_total / plot_every
-                    plot_losses.append(plot_loss_avg)
+                    if (use_vis):
+                        win = self.vis.line(X=np.array([plot_times]), Y=np.array([plot_loss_avg]), win=win,update='append')
                     plot_loss_total = 0
+                    plot_times += 1
+
                 if (iter + epoch * n_iters) % save_every == 0:
                     torch.save(self.encoder.state_dict(), 'train_fruit/' + description + '_encoder.pkl')
                     torch.save(self.decoder.state_dict(), 'train_fruit/' + description + '_decoder.pkl')
                     torch.save(self.context.state_dict(), 'train_fruit/' + description + '_context.pkl')
 
-    def trainIters(self,n_iters, print_every=100, evaluate_every = 100,save_every=100, learning_rate=0.0001):
+
+    def trainIters(self,n_iters, print_every=100, plot_every = 30,evaluate_every = 100,save_every=100, learning_rate=0.0001):
 
         start = time.time()
         plot_losses = []
+        x_plot_losses = []
         print_loss_total = 0  # Reset every print_every
         plot_loss_total = 0  # Reset every plot_every
-
+        plot_times = 0
+        if (use_vis):
+            win = self.vis.line(X=np.array([0]), Y=np.array([0]))
         encoder_optimizer = optim.SGD(self.encoder.parameters(), lr=learning_rate)
         decoder_optimizer = optim.SGD(self.decoder.parameters(), lr=learning_rate)
         context_optimizer = optim.SGD(self.context.parameters(), lr=learning_rate)
@@ -150,9 +167,15 @@ class HRED(torchsetModels):
                 # plot_losses.append(plot_loss_avg)
                 # plot_loss_total = 0
 
-            if iter % evaluate_every == 0:
-                session
+            if iter % plot_every == 0:
+                plot_loss_avg = plot_loss_total / plot_every
 
+                if (use_vis):
+                    self.vis.line(X=np.array([plot_times]), Y=np.array([plot_loss_avg]), win=win,
+                              update='append')
+
+                plot_loss_total = 0
+                plot_times += 1
 
     def evaluate(self,sentences,max):
         encoder_hidden = torch.zeros(1, batch_size, hidden_size, device=device)
@@ -195,5 +218,6 @@ class HRED(torchsetModels):
             print('=', session[-1])
             output_words = self.evaluate(session[0:-1],MAX_LENGTH)
             output_sentence = ' '.join(output_words)
+            print(self.score(session[0:-1],output_sentence,MAX_LENGTH))
             print('<', output_sentence)
             print('')

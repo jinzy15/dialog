@@ -37,3 +37,8 @@ class sentencelenPicker(Picker):
                 return False
         return True
 
+class evenSessPicker(Picker):
+    def ifchoose(self,unit):
+        if(len(unit.context)>=2 and len(unit.context)%2==0):
+            return True
+        return False

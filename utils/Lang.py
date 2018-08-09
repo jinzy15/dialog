@@ -12,8 +12,9 @@ class Lang:
         self.file = file
         self.word2index = {}
         self.word2count = {}
-        self.index2word = {0: "<pad>",1: "SOS", 2: "EOS"}
-        self.n_words = 3  # Count SOS and EOS
+        self.index2word = {0: "<pad>",1: "SOS", 2: "EOS",3:"UNK"}
+        self.n_words = 4  # Count SOS and EOS
+        self.unklist = []
 
     def addSentence(self, sentence):
         for word in sentence.split(' '):
@@ -21,10 +22,13 @@ class Lang:
 
     def addWord(self, word):
         if word not in self.word2index:
-            self.word2index[word] = self.n_words
-            self.word2count[word] = 1
-            self.index2word[self.n_words] = word
-            self.n_words += 1
+            if word in self.unklist:
+                self.word2count['UNK'] += 1
+            else:
+                self.word2index[word] = self.n_words
+                self.word2count[word] = 1
+                self.index2word[self.n_words] = word
+                self.n_words += 1
         else:
             self.word2count[word] += 1
 
@@ -94,8 +98,10 @@ class unitLang(Lang):
     def __init__(self):
         self.word2index = {}
         self.word2count = {}
-        self.index2word = {0: "<pad>", 1: "SOS", 2: "EOS"}
-        self.n_words = 3  # Count SOS and EOS
+        self.index2word = {0: "<pad>", 1: "SOS", 2: "EOS",3:"UNK"}
+        self.n_words = 4  # Count SOS and EOS
+        self.unklist = []
+
 
     def prepareData(self,unitset):
         for session in unitset:
@@ -115,3 +121,4 @@ class unitLang(Lang):
          self.word2count,
          self.index2word,
          self.n_words] = pkl.load(open(name, 'rb'))
+

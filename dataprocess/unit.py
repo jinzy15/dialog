@@ -13,7 +13,10 @@ class Unit(object):
         self.order_of_session = []
     def __repr__(self):
         return str(self.context)
-
+    def __getitem__(self, item):
+        return self.context[item]
+    def __len__(self):
+        return len(self.context)
 
 class UnitSet(object):
     def __init__(self):
@@ -35,8 +38,6 @@ class UnitSet(object):
                 if(flag):
                     self.allunit.append(temp)
     def df2unit(self,session_id,item):
-        # import ipdb;
-        # ipdb.set_trace()
         try:
             myunit = Unit()
             myunit.session_id = session_id
@@ -48,8 +49,23 @@ class UnitSet(object):
         except:
             return None,False
             pass
+    def unit2txt(self,path):
+        all_list = []
+        for item in self.allunit:
+            temp_context = list(map(lambda x:"<SOS> "+x+" <EOS>",item.context))
+            all_list.append(' '.join(temp_context))
+        all_str = str('\n'.join(all_list))
+        print(type(all_str))
+        f = open(path,'w')
+        f.write(all_str)
+        f.close()
 
     def save(self,path):
         pkl.dump(self.allunit,open(path,'wb'))
     def load(self, path):
         self.allunit = pkl.load(open(path,'rb'))
+
+#
+# unitset = UnitSet()
+# unitset.load_df('../data/allchat.csv')
+# unitset.save('../data/allchat.set')

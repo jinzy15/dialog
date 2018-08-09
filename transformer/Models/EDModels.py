@@ -1,12 +1,17 @@
 from transformer.Models.Models import *
+from visdom import Visdom
+import numpy as np
 
 class EDModels(torchsetModels):
-    def __init__(self, dataset,train_loader, test_loader, encoder,decoder):
+    def __init__(self, dataset,train_loader, test_loader, encoder,decoder,use_vis = False):
         self.train_loader = train_loader
         self.test_loader = test_loader
         self.encoder = encoder
         self.decoder = decoder
         self.dataset = dataset
+        self.use_vis = use_vis
+        if(self.use_vis):
+            self.vis = Visdom(env='seq2seq')
 
     def train(self,input_tensor, target_tensor,encoder_optimizer, decoder_optimizer,criterion, max_length=MAX_LENGTH):
         encoder_hidden = self.encoder.initHidden()
@@ -33,7 +38,6 @@ class EDModels(torchsetModels):
             for di in range(target_length):
                 decoder_output, decoder_hidden, decoder_attention = self.decoder(
                     decoder_input, decoder_hidden, encoder_outputs)
-                # print(decoder_output.shape, target_tensor[di])
                 loss += criterion(decoder_output, target_tensor[di])
                 decoder_input = target_tensor[di]  # Teacher forcing
 
@@ -78,7 +82,6 @@ class EDModels(torchsetModels):
                 print('%s (%d %d%%) %.4f' % (timeSince(start, iter / n_iters),
                                              iter, iter / n_iters * 100, print_loss_avg))
 
-
             if iter % save_every == 0:
                 torch.save(self.encoder.state_dict(), 'train_fruit/' + description + '_encoder.pkl')
                 torch.save(self.decoder.state_dict(), 'train_fruit/' + description + '_decoder.pkl')
@@ -88,6 +91,10 @@ class EDModels(torchsetModels):
         plot_losses = []
         print_loss_total = 0  # Reset every print_every
         plot_loss_total = 0  # Reset every plot_every
+
+        if (self.use_vis):
+            win = self.vis.line(X= np.array([0]),Y=np.array([0]))
+        plot_times = 0
 
         encoder_optimizer = optim.Adam(self.encoder.parameters(), lr=learning_rate)
         decoder_optimizer = optim.Adam(self.decoder.parameters(), lr=learning_rate)
@@ -110,6 +117,9 @@ class EDModels(torchsetModels):
                     plot_loss_avg = plot_loss_total / plot_every
                     plot_losses.append(plot_loss_avg)
                     plot_loss_total = 0
+                    if (self.use_vis):
+                        self.vis.line(X=np.array([plot_times]), Y=np.array([plot_loss_avg]),win=win,update='append')
+                    plot_times += 1
                 if (iter + epoch * n_iters) % save_every == 0:
                     torch.save(self.encoder.state_dict(), 'train_fruit/' + description + '_encoder.pkl')
                     torch.save(self.decoder.state_dict(), 'train_fruit/' + description + '_decoder.pkl')
@@ -147,6 +157,16 @@ class EDModels(torchsetModels):
                 decoder_input = topi.squeeze().detach()
 
             return decoded_words
+
+    def score(self,sentence):
+        with torch.no_grad():
+            input_tensor = self.dataset.tensorFromSentence(sentence)
+            input_length = len(input_tensor)
+            encoder_hidden = self.encoder.initHidden()
+            for ei in range(input_length):
+                encoder_output, encoder_hidden = self.encoder(input_tensor[ei],
+                                                         encoder_hidden)
+            return encoder_hidden
 
     def evaluateRandomly(self,n):
         for i in range(n):

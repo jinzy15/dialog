@@ -22,6 +22,24 @@ class EncoderRNN(nn.Module):
     def initHidden(self):
         return torch.zeros(1, 1, self.hidden_size, device=device)
 
+class gloveEncoderRNN(nn.Module):
+    def __init__(self, input_size, hidden_size,n_layers=1):
+        super(gloveEncoderRNN, self).__init__()
+        self.n_layers = n_layers
+        self.hidden_size = hidden_size
+        self.gru = nn.GRU(hidden_size, hidden_size)
+
+    def forward(self, input, hidden):
+        embedded = input.view(1, 1, -1)
+        output = embedded
+        for i in range(self.n_layers):
+            output, hidden = self.gru(output, hidden)
+        return output, hidden
+
+    def initHidden(self):
+        return torch.zeros(1, 1, self.hidden_size, device=device)
+
+
 class SessionEncoderRNN(nn.Module):
     def __init__(self, input_size, hidden_size,batch_size,n_layers=1):
         super(SessionEncoderRNN, self).__init__()

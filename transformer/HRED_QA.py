@@ -276,7 +276,7 @@ class HRED_QA(object):
                                                          encoder_hidden)
                 encoder_outputs[ei] = encoder_outputs[ei] + encoder_output[0][0]
 
-            decoder_input = Variable(torch.LongTensor([[self.SOS_token]]))  # SOS
+            decoder_input = Variable(torch.LongTensor([[]]))  # SOS
             decoder_input = decoder_input.cuda() if use_cuda else decoder_input
 
             decoder_hidden = encoder_hidden
