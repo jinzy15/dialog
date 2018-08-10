@@ -29,6 +29,16 @@ def pick30(sentence):
     tmp = ' '.join(tmp)
     return tmp
 
+## input is a session(type:unit) with last answer
+## n is number of outputs and features you return
+## ouputs is using merge rank to pick best n answers from context session(string) [answer1,answer2.....]
+## features is all the feature we have now(type numpy.array) (range 0-1) [answer1_features1,answer_features2.....]
+
+def get_features(input,n):
+    #your code here
+    return outputs,features
+
+
 def run(input_file_path,output_file_path):
     abs_file = os.path.dirname(__file__) + '/'
     def mergeSelect(unit):
