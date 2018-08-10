@@ -32,9 +32,9 @@ class AddRank(BaseRank,have_answer = False):
         sim = 0.5 + 0.5 * cos  # 归一化
         return sim
 
-baserank = AddRank()
-baserank.set('../data/five_set.set')
-s = baserank.unitset[20]
-print(s.context)
-check = baserank.unitset[:10]
-print(baserank.search(s,ascending=False))
+# baserank = AddRank()
+# baserank.set('../data/five_set.set')
+# s = baserank.unitset[20]
+# print(s.context)
+# check = baserank.unitset[:10]
+# print(baserank.search(s,ascending=False))

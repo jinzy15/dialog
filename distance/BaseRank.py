@@ -9,8 +9,9 @@ class BaseRank(object):
         self.unitset = None
     def distance(self,s1,s2):
         first = s1.context[-1]
+
         try:
-            second = s2.context[-2   ]
+            second = s2.context[-2]
             if len(first) > len(second):
                 first, second = second, first
             if len(second) == 0:
