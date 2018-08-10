@@ -19,6 +19,7 @@ import torch.nn.functional as F
 import os
 import numpy as np
 
+
 mydata = TorchSet('data/last_set.set','data/last_set.lang')
 input_size = mydata.lang.n_words
 output_size = mydata.lang.n_words
