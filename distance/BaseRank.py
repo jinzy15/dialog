@@ -9,7 +9,6 @@ class BaseRank(object):
         self.unitset = None
     def distance(self,s1,s2):
         first = s1.context[-1]
-
         try:
             second = s2.context[-2]
             if len(first) > len(second):
@@ -33,7 +32,7 @@ class BaseRank(object):
                     distance_matrix[i][j] = min(insertion, deletion, substitution)
             return distance_matrix[first_length - 1][second_length - 1]
         except:
-            print('have bug')
+            print('lenght have problem')
             return 0
     def score(self,s,unitset=None):
         if(unitset==None):

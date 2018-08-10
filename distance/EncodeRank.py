@@ -3,16 +3,18 @@ sys.path.append('../glove_seq2seq')
 from BaseRank import *
 from glove_seq2seq.all_package import *
 import numpy as np
+import os
 
 class EncodeRank(BaseRank):
     def __init__(self):
-        word2vec = KeyedVectors.load_word2vec_format('../glove_data/word2vec.txt')
-        mydata = VectorchSet('../data/last_set.set', '../data/last_set.lang', word2vec)
+        abs_file = os.path.dirname(__file__) + '/'
+        word2vec = KeyedVectors.load_word2vec_format(abs_file+'../glove_data/word2vec.txt')
+        mydata = VectorchSet(abs_file+'../data/last_set.set', abs_file+'../data/last_set.lang', word2vec)
         input_size = mydata.lang.n_words
         output_size = mydata.lang.n_words
         encoder1 = Modules.gloveEncoderRNN(input_size, hidden_size).to(device)
         attn_decoder1 = Modules.AttnDecoderRNN(hidden_size, output_size, dropout_p=0.1).to(device)
-        model_path = '../glove_seq2seq/'
+        model_path = abs_file+'../glove_seq2seq/'
         histmodel_path = 'train_fruit/first_debug_mode'
         if (use_histmodel):
             if (use_cuda):

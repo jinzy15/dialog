@@ -2,13 +2,15 @@ import sys
 sys.path.append('../glove_hred')
 from BaseRank import *
 from glove_hred.all_package import *
+import os
 
 class HredEncodeRank(BaseRank):
     def __init__(self):
         self.unitset = None
-        model_path = '../glove_hred/'
-        word2vec = KeyedVectors.load_word2vec_format(glove_data)
-        mydata = hredVectorchSet('../'+hredVectorchSet_name + '.set', '../'+hredVectorchSet_name + '.lang', word2vec)
+        abs_file = os.path.dirname(__file__)+'/'
+        model_path = abs_file+'../glove_hred/'
+        word2vec = KeyedVectors.load_word2vec_format(abs_file+glove_data)
+        mydata = hredVectorchSet(abs_file+'../'+hredVectorchSet_name + '.set', abs_file+'../'+hredVectorchSet_name + '.lang', word2vec)
         input_size = mydata.lang.n_words
         output_size = mydata.lang.n_words
         trainloader = DataLoader(mydata)

@@ -4,7 +4,8 @@ from gensim.models import KeyedVectors
 import numpy as np
 class AddRank(BaseRank,have_answer = False):
     def __init__(self):
-        self.word2vec = KeyedVectors.load_word2vec_format('../glove_data/word2vec.txt')
+        abs_file = os.path.dirname(__file__) + '/'
+        self.word2vec = KeyedVectors.load_word2vec_format(abs_file+'../glove_data/word2vec.txt')
     def distance(self,s1,s2):
         first = s1.context[-1]
         second = s2.context[-2]
