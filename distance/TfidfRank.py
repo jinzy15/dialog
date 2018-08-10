@@ -33,14 +33,14 @@ class TfidfRank(BaseRank):
         sim = self.ss.sensimilarity(s1,s2)
         return sim
 
-    def search(self,s):
+    def search(self,s,n):
         q_sims = self.qss.similarity(s.context[-2])
         context_sims = self.ss.similarity(' '.join(s.context[:-2]))
         sims = [sum(sim) for sim in zip(q_sims,context_sims)]
         sims = sorted(list(enumerate(sims)), key=lambda item: item[1], reverse=True)
-        con_sorted_sims = [self.context[sim[0]].split(',') for sim in sims][:5]
-        q_sorted_sims = [[self.question[sim[0]]] for sim in sims][:5]
-        a_sorted_sims = [[self.answer[sim[0]]] for sim in sims][:5]
+        con_sorted_sims = [self.context[sim[0]].split(',') for sim in sims][:n]
+        q_sorted_sims = [[self.question[sim[0]]] for sim in sims][:n]
+        a_sorted_sims = [[self.answer[sim[0]]] for sim in sims][:n]
         sorted_sim = [sim[0]+sim[1]+sim[2] for sim in zip(con_sorted_sims,q_sorted_sims,a_sorted_sims)]
         return sorted_sim
 #
