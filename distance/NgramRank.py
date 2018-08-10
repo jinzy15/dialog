@@ -9,9 +9,6 @@ class NgramRank(BaseRank):
     def distance(self,s1,s2): #s1 is a query session s2 is session pool
         def D(i,j,N):
 
-
-
-
         first = s1.context[-1]
         try:
             second = s2.context[-2]
