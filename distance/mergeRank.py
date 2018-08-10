@@ -7,6 +7,7 @@ from HredRank import *
 from TfidfRank import *
 from EncodeRank import *
 from HredEncodeRank import *
+from AddRank import *
 from fileObject import *
 from unit import *
 import numpy as np
@@ -62,12 +63,11 @@ def run(input_file_path,output_file_path):
     hredrank.set(abs_file+'/../data/allchat.set')
 
     file_obj = FileObj(abs_file+"/../tfidf/tfidf_data/context.txt")
-    train_sentences = file_obj.read_lines()[:100]
+    train_sentences = file_obj.read_lines()
     file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/questions.txt")
-    q_train_sentences = file_obj.read_lines()[:100]
+    q_train_sentences = file_obj.read_lines()
     file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/answers.txt")
-    answer = file_obj.read_lines()[:100]
-
+    answer = file_obj.read_lines()
 
     tfidfrank = TfidfRank(train_sentences,q_train_sentences,answer)
     tfidfrank.set(abs_file+'/../data/allchat.set')
@@ -85,6 +85,6 @@ def run(input_file_path,output_file_path):
     for sentence in test_sentences:
         unit = Unit()
         unit.context = sentence.split('<s>')
-        result = mergeSelect(unit)
+        result = mergeSelect(unit)+'\n'
         file_result.write(result)
 
