@@ -1,12 +1,14 @@
 from BaseRank import *
 from gensim.models import KeyedVectors
+import os
 #set passed by AddRank has to be split
 import numpy as np
-class AddRank(BaseRank,have_answer = False):
+
+class AddRank(BaseRank):
     def __init__(self):
         abs_file = os.path.dirname(__file__) + '/'
         self.word2vec = KeyedVectors.load_word2vec_format(abs_file+'../glove_data/word2vec.txt')
-    def distance(self,s1,s2):
+    def distance(self,s1,s2): ## s1 is query s2 is similar query to s1 from train set
         first = s1.context[-1]
         second = s2.context[-2]
         first = first.split(' ')

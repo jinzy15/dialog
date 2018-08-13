@@ -9,6 +9,7 @@ class HredRank(BaseRank):
         self.unitset = None
         abs_file = os.path.dirname(__file__) + '/'
         model_path = abs_file+'../glove_hred/'
+        glove_data = '../glove_data/word2vec.txt'
         word2vec = KeyedVectors.load_word2vec_format(abs_file+glove_data)
         mydata = hredVectorchSet(abs_file+'../'+hredVectorchSet_name + '.set', abs_file+'../'+hredVectorchSet_name + '.lang', word2vec)
         input_size = mydata.lang.n_words
@@ -29,8 +30,6 @@ class HredRank(BaseRank):
         self.mymodel = mymodel
 
     def distance(self, s1, s2):
-        print(s1)
-        print(s2)
         return self.mymodel.score(s1.context,s2.context[-1],MAX_LENGTH)
 
 

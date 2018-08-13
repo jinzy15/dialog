@@ -9,7 +9,7 @@ from EncodeRank import *
 from HredEncodeRank import *
 from AddRank import *
 from fileObject import *
-from unit import *
+from dataprocess.unit import *
 import numpy as np
 from dataprocess.processor import Processor
 
@@ -38,11 +38,11 @@ class mergeselect(object):
         self.hredrank.set(abs_file + '/../data/allchat.set')
 
         file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/context.txt")
-        train_sentences = file_obj.read_lines()
+        train_sentences = file_obj.read_lines()[:100]
         file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/questions.txt")
-        q_train_sentences = file_obj.read_lines()
+        q_train_sentences = file_obj.read_lines()[:100]
         file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/answers.txt")
-        answer = file_obj.read_lines()
+        answer = file_obj.read_lines()[:100]
 
         self.tfidfrank = TfidfRank(train_sentences, q_train_sentences, answer)
         self.tfidfrank.set(abs_file + '/../data/allchat.set')
@@ -61,16 +61,20 @@ class mergeselect(object):
 
     def get_features(self,input,n):
         #your code here
+        unit = input
         top_n = self.tfidfrank.search(input,n)
         outputs = [output[-1] for output in top_n]
         # features are ordered by (baserank,)
         unitset = UnitSet()
+
         for top in top_n:
             tmp = Unit()
             sen = [pick30(ch_normalizeAString(s)) for s in top]
             tmp.context = sen
             unitset.allunit.append(tmp)
+
         processor = Processor()
+
         unit.context = [pick30(ch_normalizeAString(s)) for s in unit.context]
         unitset = processor.run(unitset=unitset)
         hredranks = softmax([self.hredrank.distance(unit, t) for t in unitset])

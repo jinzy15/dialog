@@ -28,14 +28,14 @@ class TfidfRank(BaseRank):
         self.qss.TfidfModel()
 
     def distance(self,s1,s2):
-        s1 =','.join(s1.context[:-1])
+        s1 =','.join(s1.context)
         s2 = ','.join(s2.context[:-1])
         sim = self.ss.sensimilarity(s1,s2)
         return sim
 
     def search(self,s,n):
-        q_sims = self.qss.similarity(s.context[-2])
-        context_sims = self.ss.similarity(' '.join(s.context[:-2]))
+        q_sims = self.qss.similarity(s.context[-1])
+        context_sims = self.ss.similarity(' '.join(s.context[:-1]))
         sims = [sum(sim) for sim in zip(q_sims,context_sims)]
         sims = sorted(list(enumerate(sims)), key=lambda item: item[1], reverse=True)
         con_sorted_sims = [self.context[sim[0]].split(',') for sim in sims][:n]
