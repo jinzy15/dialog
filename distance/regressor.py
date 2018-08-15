@@ -45,12 +45,14 @@ if pt.cuda.is_available():
 criterion = nn.MSELoss()
 optimizer = optim.SGD(model.parameters(), lr=disConfig.learning_rate)
 
-train = True
+train = False
 save_path = 'five_set.pkl'
-evaluate = True
+evaluate = False
+test = True
 evaluate_times = 10
 if_train_have_answer = True
 if_eval_have_answer = True
+
 
 if (os.path.exists(save_path)):
     model.load_state_dict(pt.load(save_path))
@@ -60,7 +62,6 @@ if (os.path.exists(save_path)):
 if(train):
     for i in range(disConfig.num_epoch):
         for j,item in enumerate(mydata):
-            import ipdb;ipdb.set_trace()
             if(if_train_have_answer):
                 answer = Normalizer.ch_normalizeAString(item.context[-1])
                 item.context = item.context[:-1]
@@ -70,36 +71,47 @@ if(train):
             print(answer)
             print(outputs)
             print(features)
-            # import ipdb;ipdb.set_trace()
-            # for output in outputs:
-            #     output = Normalizer.ch_normalizeAString(output)
-            #     score.append(sentence_bleu([output.split(' ')],answer.split(' '),
-            #                               weights=(0.25,0.25,0.25,0.25),
-            #                               smoothing_function=chencherry.method1))
-            # features = pt.FloatTensor(features)
-            # score = pt.FloatTensor(score)
-            # if pt.cuda.is_available():
-            #     features = features.cuda()
-            #     score = score.cuda()
-            # pred = model(features)
-            # loss = criterion(pred.view(-1),score)
-            # loss.backward()
-            # optimizer.step()
-            # print(loss)
-        # pt.save(model.state_dict(), save_path)
+            for output in outputs:
+                output = Normalizer.ch_normalizeAString(output)
+                score.append(sentence_bleu([output.split(' ')],answer.split(' '),
+                                          weights=(0.25,0.25,0.25,0.25),
+                                          smoothing_function=chencherry.method1))
+            features = pt.FloatTensor(features)
+            score = pt.FloatTensor(score)
+            if pt.cuda.is_available():
+                features = features.cuda()
+                score = score.cuda()
+            pred = model(features)
+            loss = criterion(pred.view(-1),score)
+            loss.backward()
+            optimizer.step()
+            print(loss)
+        pt.save(model.state_dict(), save_path)
 #
-# if(evaluate):
-#     for i in range(evaluate_times):
-#         session = random.choice(mydata)
-#         if (if_eval_have_answer):
-#             session.context = session.context[:-1]
-#         print(session.context)
-#         outputs, features = myselect.get_add_features(session, disConfig.batch_size)
-#         features = pt.FloatTensor(features)
-#         if pt.cuda.is_available():
-#             features = features.cuda()
-#         pred = model(features)
-#         pred = pred.cpu().detach().numpy()
-#         arg = pred.argsort()
-#         print(outputs[int(arg[-1])])
+if(evaluate):
+    for i in range(evaluate_times):
+        session = random.choice(mydata)
+        if (if_eval_have_answer):
+            session.context = session.context[:-1]
+        print(session.context)
+        outputs, features = myselect.get_add_features(session, disConfig.batch_size)
+        features = pt.FloatTensor(features)
+        if pt.cuda.is_available():
+            features = features.cuda()
+        pred = model(features)
+        pred = pred.cpu().detach().numpy()
+        arg = pred.argsort()
+        print(outputs[int(arg[-1])])
+
+if(test):
+    ## your code here get your text file
+    ## text_file is a unit list
+    ## text_file = []
+    ans = []
+    for item in text_file:
+        outputs, features = myselect.get_add_features(item,30)
+        ## your calculate code here
+        ## and add your answer
+        ans.append(outputs[0])
+
 

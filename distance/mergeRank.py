@@ -3,6 +3,7 @@
 import sys
 sys.path.append('../tfidf/tfidf_')
 sys.path.append('../dataprocess/')
+sys.path.append('../cooccurre/')
 from AddRank import *
 from HredRank import *
 from TfidfRank import *
@@ -10,7 +11,10 @@ from EncodeRank import *
 from HredEncodeRank import *
 from AddRank import *
 from fileObject import *
+from bleuRank import *
 from dataprocess.unit import *
+from cooccurre.BaseCooc import BaseCooc
+from cooccurre.SnowCooc import SnowCooc
 import numpy as np
 from dataprocess.processor import Processor
 
@@ -56,6 +60,12 @@ class mergeselect(object):
         self.addrank = AddRank()
         self.addrank.set(abs_file + '/../data/AddRank.set')
 
+        self.bleuRank = bleuRank()
+        self.basecooc = BaseCooc()
+        self.basecooc.load('../cooccurre/all_nor', '../cooccurre/all_nor')
+        self.snowcooc = SnowCooc()
+        self.snowcooc.load('../cooccurre/all_snow', '../cooccurre/all_snow')
+
     def get_add_features(self,input,n):
 
         unit = input
@@ -73,14 +83,23 @@ class mergeselect(object):
         unit.context = [pick30(ch_normalizeAString(s)) for s in unit.context]
         # unitset = processor.run(unitset=unitset)
 
-        hredranks = softmax([self.hredrank.distance(unit, t) for t in unitset])
-        baseranks = minussoftmax([self.baserank.distance(unit, t) for t in unitset])
-        encoderanks = softmax([self.encoderank.distance(unit, t) for t in unitset])
-        addranks = softmax(add_features)
+        # hredranks = softmax([self.hredrank.distance(unit, t) for t in unitset])
+        # baseranks = minussoftmax([self.baserank.distance(unit, t) for t in unitset])
+        # encoderanks = softmax([self.encoderank.distance(unit, t) for t in unitset])
+        # addranks = softmax(add_features)
+        # hredencoderanks = softmax([self.hredencoderank.distance(unit, t) for t in unitset])
+
+        baseranks = [self.baserank.distance(unit, t) for t in unitset]
+        encoderanks = [self.encoderank.distance(unit, t) for t in unitset]
+        addranks = add_features
+        hredencoderanks = [self.hredencoderank.distance(unit, t) for t in unitset]
+        bleuRanks =  [self.bleuRank.distance(unit, t) for t in unitset]
+        basecoocs = [self.basecooc.cooccurre(unit.context[-1],t.context[-1]) for t in unitset]
+
         # snowranks = softmax([snowrank.cooccurre(unit.context[-1], t.context[-1]) for t in unitset])
         # import ipdb;ipdb.set_trace()
-        hredencoderanks = softmax([self.hredencoderank.distance(unit, t) for t in unitset])
-        features = [list(ranks) for ranks in zip(baseranks,hredranks,encoderanks,hredencoderanks,addranks)]
+
+        features = [list(ranks) for ranks in zip(baseranks,encoderanks,hredencoderanks,addranks,bleuRanks,basecoocs)]
         outputs = [output.context[-1] for output in outputs]
         return outputs,features
 

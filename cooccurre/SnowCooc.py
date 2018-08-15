@@ -13,9 +13,9 @@ class SnowCooc(BaseCooc):
                 res.append(i)
         return ' '.join(res)
 
-basecooc = SnowCooc()
-# basecooc.transet('../data/all_set_add.set','all_snow','all_snow')
-basecooc.load('all_snow','all_snow')
-
-print(basecooc.search('哎,你忙吧'))
-import ipdb;ipdb.set_trace()
+# basecooc = SnowCooc()
+# # basecooc.transet('../data/all_set_add.set','all_snow','all_snow')
+# basecooc.load('all_snow','all_snow')
+#
+# print(basecooc.search('哎,你忙吧'))
+# import ipdb;ipdb.set_trace()
