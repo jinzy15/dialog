@@ -98,7 +98,7 @@ class BaseCooc(object):
             return ''
         return outStr
 
-basecooc = BaseCooc()
-# # basecooc.transet('../data/all_set_add.set','all_nor','all_nor')
-basecooc.load('all_nor','all_nor')
-import ipdb;ipdb.set_trace()
+# basecooc = BaseCooc()
+# # # basecooc.transet('../data/all_set_add.set','all_nor','all_nor')
+# basecooc.load('all_nor','all_nor')
+# import ipdb;ipdb.set_trace()

@@ -21,7 +21,7 @@ class Pipe:
 
 processor = Processor()  #对文本进行分词,和过滤
 addpro = addProcessor()  #对文本顺序进行合成
-dividepro = divideProcessor()
+# dividepro = divideProcessor()
 lastPick = pickLastProcessor() #只选取最后一轮对话
 lenpicker = sentencelenPicker(min=-1,max=30) #选择句子的长度
 slenpicker =sesslenPicker(min=2)  #选择对话的轮数
@@ -33,9 +33,10 @@ evenpicker = evenSessPicker()
 # mypipe = Pipe('../data/chat.pkl','../data/last_set')
 # mypipe.filters = last_seq_list
 # glove_set_list = [processor,lenpicker]
-all_set_list = [addpro]
+all_set_list = [processor,slenpicker]
 # all_set_list = [dividepro]
-mypipe = Pipe('../data/allchat.set','../data/all_set_add')
+# mypipe = Pipe('../data/allchat.set','../data/all_set_add')
+mypipe = Pipe('../data/all_set_add.set','../data/AddRank')
 mypipe.filters = all_set_list
 mypipe.run()
 

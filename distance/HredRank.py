@@ -11,7 +11,9 @@ class HredRank(BaseRank):
         model_path = abs_file+'../glove_hred/'
         glove_data = '../glove_data/word2vec.txt'
         word2vec = KeyedVectors.load_word2vec_format(abs_file+glove_data)
-        mydata = hredVectorchSet(abs_file+'../'+hredVectorchSet_name + '.set', abs_file+'../'+hredVectorchSet_name + '.lang', word2vec)
+        mydata = hredVectorchSet(abs_file+'../'+'data/glove_set_divide' + '.set',
+                                 abs_file+'../'+'data/glove_set_divide' + '.lang',
+                                 word2vec)
         input_size = mydata.lang.n_words
         output_size = mydata.lang.n_words
         trainloader = DataLoader(mydata)

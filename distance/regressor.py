@@ -16,6 +16,7 @@ from nltk.translate.bleu_score import SmoothingFunction
 import disConfig
 import utils.Normalizer as Normalizer
 import random
+pt.cuda.set_device(0)
 
 class MLP(pt.nn.Module):
     def __init__(self):
@@ -33,7 +34,7 @@ import os
 abs_file = os.path.dirname(__file__)+'/'
 
 mydata = UnitSet()
-mydata.load('../data/five_set.set')
+mydata.load('../data/AddRank.set')
 
 myselect = mergeselect()
 model = MLP()
@@ -59,63 +60,46 @@ if (os.path.exists(save_path)):
 if(train):
     for i in range(disConfig.num_epoch):
         for j,item in enumerate(mydata):
+            import ipdb;ipdb.set_trace()
             if(if_train_have_answer):
+                answer = Normalizer.ch_normalizeAString(item.context[-1])
                 item.context = item.context[:-1]
-
-            optimizer.zero_grad()
-            answer = Normalizer.ch_normalizeAString(item.context[-1])
+            # optimizer.zero_grad()
             score = []
-            outputs,features = myselect.get_features(item,disConfig.batch_size)
-
-
-            for output in outputs:
-                output = Normalizer.ch_normalizeAString(output)
-                score.append(sentence_bleu([output.split(' ')],answer.split(' '),
-                                          weights=(0.25,0.25,0.25,0.25),
-                                          smoothing_function=chencherry.method1))
-            features = pt.FloatTensor(features)
-            score = pt.FloatTensor(score)
-            if pt.cuda.is_available():
-                features = features.cuda()
-                score = score.cuda()
-            pred = model(features)
-            loss = criterion(pred.view(-1),score)
-            loss.backward()
-            optimizer.step()
-        pt.save(model.state_dict(), save_path)
-
-if(evaluate):
-    for i in range(evaluate_times):
-        session = random.choice(mydata)
-        if (if_eval_have_answer):
-            session.context = session.context[:-1]
-        print(session.context)
-        outputs, features = myselect.get_features(session, disConfig.batch_size)
-        features = pt.FloatTensor(features)
-        if pt.cuda.is_available():
-            features = features.cuda()
-        pred = model(features)
-        pred = pred.cpu().detach().numpy()
-        arg = pred.argsort()
-        print(outputs[int(arg[-1])])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            outputs,features = myselect.get_add_features(item,disConfig.batch_size)
+            print(answer)
+            print(outputs)
+            print(features)
+            # import ipdb;ipdb.set_trace()
+            # for output in outputs:
+            #     output = Normalizer.ch_normalizeAString(output)
+            #     score.append(sentence_bleu([output.split(' ')],answer.split(' '),
+            #                               weights=(0.25,0.25,0.25,0.25),
+            #                               smoothing_function=chencherry.method1))
+            # features = pt.FloatTensor(features)
+            # score = pt.FloatTensor(score)
+            # if pt.cuda.is_available():
+            #     features = features.cuda()
+            #     score = score.cuda()
+            # pred = model(features)
+            # loss = criterion(pred.view(-1),score)
+            # loss.backward()
+            # optimizer.step()
+            # print(loss)
+        # pt.save(model.state_dict(), save_path)
+#
+# if(evaluate):
+#     for i in range(evaluate_times):
+#         session = random.choice(mydata)
+#         if (if_eval_have_answer):
+#             session.context = session.context[:-1]
+#         print(session.context)
+#         outputs, features = myselect.get_add_features(session, disConfig.batch_size)
+#         features = pt.FloatTensor(features)
+#         if pt.cuda.is_available():
+#             features = features.cuda()
+#         pred = model(features)
+#         pred = pred.cpu().detach().numpy()
+#         arg = pred.argsort()
+#         print(outputs[int(arg[-1])])
 

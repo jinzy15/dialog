@@ -3,6 +3,7 @@
 import sys
 sys.path.append('../tfidf/tfidf_')
 sys.path.append('../dataprocess/')
+from AddRank import *
 from HredRank import *
 from TfidfRank import *
 from EncodeRank import *
@@ -33,26 +34,55 @@ class mergeselect(object):
     def __init__(self):
         abs_file = os.path.dirname(__file__)
         self.baserank = BaseRank()
-        self.baserank.set(abs_file + '/../data/allchat.set')
+        # self.baserank.set(abs_file + '/../data/allchat.set')
         self.hredrank = HredRank()
-        self.hredrank.set(abs_file + '/../data/allchat.set')
+        # self.hredrank.set(abs_file + '/../data/allchat.set')
 
-        file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/context.txt")
-        train_sentences = file_obj.read_lines()[:100]
-        file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/questions.txt")
-        q_train_sentences = file_obj.read_lines()[:100]
-        file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/answers.txt")
-        answer = file_obj.read_lines()[:100]
+        # file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/context.txt")
+        # train_sentences = file_obj.read_lines()
+        # file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/questions.txt")
+        # q_train_sentences = file_obj.read_lines()
+        # file_obj = FileObj(abs_file + "/../tfidf/tfidf_data/answers.txt")
+        # answer = file_obj.read_lines()
 
-        self.tfidfrank = TfidfRank(train_sentences, q_train_sentences, answer)
-        self.tfidfrank.set(abs_file + '/../data/allchat.set')
+        # self.tfidfrank = TfidfRank(train_sentences, q_train_sentences, answer)
+        # self.tfidfrank.set(abs_file + '/../data/allchat.set')
 
         self.hredencoderank = HredEncodeRank()
-        self.hredencoderank.set(abs_file + '/../data/allchat.set')
+        # self.hredencoderank.set(abs_file + '/../data/allchat.set')
         self.encoderank = EncodeRank()
-        self.encoderank.set(abs_file + '/../data/allchat.set')
+        # self.encoderank.set(abs_file + '/../data/allchat.set')
+
         self.addrank = AddRank()
-        self.addrank.set(abs_file + '/../data/allchat.set')
+        self.addrank.set(abs_file + '/../data/AddRank.set')
+
+    def get_add_features(self,input,n):
+
+        unit = input
+        top_n = self.addrank.search(unit,n,ascending=False)
+        add_features = [output[0] for output in top_n]
+        outputs = [output[-1] for output in top_n]
+        unitset = UnitSet()
+        # for output in outputs:
+        #     tmp = Unit()
+        #     # sen = [pick30(ch_normalizeAString(s)) for s in top]
+        #     tmp.context = output
+        #     unitset.allunit.append(tmp)
+        unitset.allunit = outputs
+        processor = Processor()
+        unit.context = [pick30(ch_normalizeAString(s)) for s in unit.context]
+        # unitset = processor.run(unitset=unitset)
+
+        hredranks = softmax([self.hredrank.distance(unit, t) for t in unitset])
+        baseranks = minussoftmax([self.baserank.distance(unit, t) for t in unitset])
+        encoderanks = softmax([self.encoderank.distance(unit, t) for t in unitset])
+        addranks = softmax(add_features)
+        # snowranks = softmax([snowrank.cooccurre(unit.context[-1], t.context[-1]) for t in unitset])
+        # import ipdb;ipdb.set_trace()
+        hredencoderanks = softmax([self.hredencoderank.distance(unit, t) for t in unitset])
+        features = [list(ranks) for ranks in zip(baseranks,hredranks,encoderanks,hredencoderanks,addranks)]
+        outputs = [output.context[-1] for output in outputs]
+        return outputs,features
 
     ## input is a session(type:unit) with last answer
     ## n is number of outputs and features you return

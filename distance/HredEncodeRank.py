@@ -9,8 +9,10 @@ class HredEncodeRank(BaseRank):
         self.unitset = None
         abs_file = os.path.dirname(__file__)+'/'
         model_path = abs_file+'../glove_hred/'
-        word2vec = KeyedVectors.load_word2vec_format(abs_file+glove_data)
-        mydata = hredVectorchSet(abs_file+'../'+hredVectorchSet_name + '.set', abs_file+'../'+hredVectorchSet_name + '.lang', word2vec)
+        word2vec = KeyedVectors.load_word2vec_format(abs_file+'../glove_data/word2vec.txt')
+        mydata = hredVectorchSet(abs_file+'../'+'data/glove_set_divide' + '.set',
+                                 abs_file+'../'+'data/glove_set_divide' + '.lang',
+                                 word2vec)
         input_size = mydata.lang.n_words
         output_size = mydata.lang.n_words
         trainloader = DataLoader(mydata)

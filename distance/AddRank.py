@@ -36,8 +36,8 @@ class AddRank(BaseRank):
         return sim
 
 # baserank = AddRank()
-# baserank.set('../data/five_set.set')
+# baserank.set('../data/allchat.set')
 # s = baserank.unitset[20]
 # print(s.context)
-# check = baserank.unitset[:10]
+# # check = baserank.unitset[:10]
 # print(baserank.search(s,ascending=False))
